@@ -37,7 +37,7 @@ export default function Footer({ theme, slogans, scrollToSection }: FooterProps)
         borderColor: 'rgba(255, 255, 255, 0.05)'
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" style={{ marginLeft: '233px', marginTop: '0px' }}>
         <div className="border-b border-zinc-900 pb-6">
           
           <div className="flex flex-col space-y-6 items-start text-left max-w-xl">

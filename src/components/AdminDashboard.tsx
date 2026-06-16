@@ -9,7 +9,7 @@ import {
   Plus, Edit2, Trash2, Sliders, Type, Database, Check, RefreshCw, 
   Sparkles, ShieldCheck, Mail, Calendar, Coins, Settings, FolderOpen,
   Eye, Save, X, Info, ArrowUp, ArrowDown, EyeOff, GripVertical, Copy,
-  User, MessageCircle, ChevronUp, ChevronDown, Tag, Home
+  User, MessageCircle, ChevronUp, ChevronDown, Tag, Home, Github
 } from 'lucide-react';
 import { Project, ThemeSettings, SloganSettings, Inquiry } from '../types';
 import { CATEGORIES } from '../data';
@@ -39,7 +39,42 @@ export default function AdminDashboard({
 }: AdminDashboardProps) {
   
   // Dashboard Active Tab
-  const [activeTab, setActiveTab] = useState<'theme' | 'about' | 'projects' | 'contact' | 'inquiries'>('theme');
+  const [activeTab, setActiveTab] = useState<'theme' | 'about' | 'projects' | 'contact' | 'inquiries' | 'export'>('theme');
+  const [exportCopied, setExportCopied] = useState<boolean>(false);
+  const [serverSaving, setServerSaving] = useState<boolean>(false);
+  const [serverSaveSuccess, setServerSaveSuccess] = useState<boolean>(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const handleSyncToServer = async () => {
+    setServerSaving(true);
+    setServerError(null);
+    setServerSaveSuccess(false);
+
+    try {
+      const response = await fetch('/api/save-config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ theme, slogans, projects }),
+      });
+
+      if (!response.ok) {
+        throw new Error('서버 데이터를 업데이트하는 데 실패했습니다.');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setServerSaveSuccess(true);
+      } else {
+        throw new Error('서버 처리 중 오류가 발생했습니다.');
+      }
+    } catch (err: any) {
+      setServerError(err.message || '서버 파일(src/data.ts) 수정 중 오류가 발생했습니다.');
+    } finally {
+      setServerSaving(false);
+    }
+  };
 
   // CRUD States for Projects
   const [isEditingProject, setIsEditingProject] = useState<boolean>(false);
@@ -610,7 +645,8 @@ export const INITIAL_INQUIRIES: Inquiry[] = ${JSON.stringify(inquiries, null, 2)
             { id: 'about', label: '프로필', icon: User },
             { id: 'projects', label: '아카이브', icon: Database },
             { id: 'contact', label: '커뮤니케이션', icon: MessageCircle },
-            { id: 'inquiries', label: '수신함', icon: Mail, count: inquiries.filter(i=>i.status==='pending').length }
+            { id: 'inquiries', label: '수신함', icon: Mail, count: inquiries.filter(i=>i.status==='pending').length },
+            { id: 'export', label: 'GitHub 영구 저장 가이드', icon: Github }
           ].map((tab) => {
             const IconComp = tab.icon;
             const isActive = activeTab === tab.id;
@@ -2218,6 +2254,121 @@ export const INITIAL_INQUIRIES: Inquiry[] = ${JSON.stringify(inquiries, null, 2)
                 )}
               </div>
 
+            </div>
+          )}
+
+          {/* TAB: EXPORT/GITHUB SYNC */}
+          {activeTab === 'export' && (
+            <div className="space-y-8 animate-fade-in font-sans">
+              <div>
+                <h3 className="text-lg font-black text-white flex items-center gap-2">
+                  <Github className="w-4 h-4 text-yellow-400" />
+                  GitHub 동기화 및 영구 저장
+                </h3>
+                <p className="text-xs text-zinc-500 mt-0.5">현재 수정한 모든 데이터를 코드 파일(data.ts)에 영구 적용하여 모바일과 모든 브라우저에 항상 뜨도록 설정합니다.</p>
+              </div>
+
+              <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 md:p-8 space-y-6">
+                
+                {/* 1-Click Server Sync Block */}
+                <div className="bg-yellow-400/5 border border-yellow-400/10 rounded-2xl p-6 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-yellow-400/10 flex items-center justify-center text-yellow-400 shrink-0 border border-yellow-400/20">
+                      <Sparkles className="w-5 h-5 animate-pulse" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-white">클릭 한 번으로 솔루션 완성하기 (추천)</h4>
+                      <p className="text-xs text-zinc-400 mt-0.5">복잡하게 채팅으로 보내실 필요 없이, 이 버튼 하나로 작업 공간에 직접 반영됩니다.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      현재 어드민(홈페이지, 프로필, 아카이브, 커뮤니케이션)에서 입력하신 모든 정보는 <strong>브라우저의 임시 로컬 저장소(LocalStorage)</strong>에만 기록되어 있습니다. 모바일이나 배포 환경에서도 똑같이 뜨게 하려면 아래 버튼을 눌러 소스코드에 주입해야 합니다.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-2">
+                      <button
+                        onClick={handleSyncToServer}
+                        disabled={serverSaving}
+                        className="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 disabled:bg-zinc-850 disabled:text-zinc-500 text-black rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-yellow-400/10 shrink-0"
+                      >
+                        {serverSaving ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            파일에 저장 중...
+                          </>
+                        ) : serverSaveSuccess ? (
+                          <>
+                            <Check className="w-4 h-4" />
+                            영구 저장 성공!
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4" />
+                            현재 수정본을 소스코드 파일에 저장
+                          </>
+                        )}
+                      </button>
+
+                      {serverSaveSuccess && (
+                        <p className="text-xs text-green-400 font-bold bg-green-500/10 border border-green-500/20 px-3 py-2 rounded-lg animate-fade-in">
+                          ✓ 성공! <code className="bg-zinc-900 px-1 py-0.5 rounded text-zinc-300">src/data.ts</code> 파일에 완벽하게 내보내졌습니다. 이제 오른쪽 맨 위 <strong>GitHub</strong> 탭(고양이 아이콘 옆)을 클릭하고 <strong>Stage and commit all changes</strong>를 누르면 Netlify에서 영구 배포가 자동 갱신됩니다!
+                        </p>
+                      )}
+
+                      {serverError && (
+                        <p className="text-xs text-red-400 font-bold bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg">
+                          ⚠️ 실패: {serverError}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-zinc-900 pt-6">
+                  <h4 className="text-sm font-bold text-white mb-4">영구 저장 4단계 가이드</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-900 space-y-2">
+                      <div className="text-xs font-bold text-yellow-400 font-mono">01. 수정 완료하기</div>
+                      <p className="text-[11px] text-zinc-400 leading-relaxed">포트폴리오, 컬러, 슬로건 등 세팅 수정 완료하기.</p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-900 space-y-2">
+                      <div className="text-xs font-bold text-yellow-400 font-mono">02. 파일에 저장 클릭</div>
+                      <p className="text-[11px] text-zinc-400 leading-relaxed">위 노란색 상자의 <strong>'현재 수정본을 소스코드 파일에 저장'</strong> 누르기.</p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-900 space-y-2">
+                      <div className="text-xs font-bold text-yellow-400 font-mono">03. 깃허브 탭 클릭</div>
+                      <p className="text-[11px] text-zinc-400 leading-relaxed">우측 상단 메뉴에서 <strong>GitHub</strong> 탭 또는 동기화 메뉴 열기.</p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-900 space-y-2">
+                      <div className="text-xs font-bold text-yellow-400 font-mono">04. 커밋 & 퍼블리시</div>
+                      <p className="text-[11px] text-zinc-400 leading-relaxed">커밋 메시지 입력 후 <strong>Stage and commit all changes</strong> 클릭하면 Netlify 자동 배포 완료!</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Backup manual code block */}
+                <div className="bg-zinc-950 p-6 rounded-xl border border-zinc-900 space-y-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <h4 className="text-xs font-bold text-zinc-300">백업/수동 백업용 원시 설정 코드 (선택사항)</h4>
+                      <p className="text-[11px] text-zinc-500 mt-1">혹시라도 직접 데이터를 간직하거나, 하단 어시스턴트에 전달하고 싶으시다면 마우스로 드래그해서 복사해 가세요!</p>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <textarea
+                      readOnly
+                      onClick={(e) => (e.target as HTMLTextAreaElement).select()}
+                      value={JSON.stringify({ theme, slogans, projects }, null, 2)}
+                      className="w-full h-40 bg-zinc-950 border border-zinc-900 rounded-lg p-3 text-[10px] font-mono text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-800 cursor-text"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none rounded-b-lg" />
+                  </div>
+                </div>
+
+              </div>
             </div>
           )}
 

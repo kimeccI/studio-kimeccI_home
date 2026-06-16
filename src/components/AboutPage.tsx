@@ -35,7 +35,7 @@ export default function AboutPage({ theme, slogans }: AboutPageProps) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-10 sm:pb-16 min-h-[80vh] relative">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-10 sm:pb-16 min-h-[80vh] relative" style={{ marginBottom: '-74px', paddingBottom: '70px' }}>
       {/* Decorative Orbs */}
       <div 
         className="absolute bottom-1/4 right-0 w-96 h-96 rounded-full blur-[180px] opacity-10 pointer-events-none"
