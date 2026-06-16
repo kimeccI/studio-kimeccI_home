@@ -6,7 +6,21 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ThemeSettings, SloganSettings } from '../types';
-import { Sparkles, User, ShieldCheck } from 'lucide-react';
+import { Sparkles, User, ShieldCheck, Youtube, Instagram } from 'lucide-react';
+
+const Tiktok = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+  </svg>
+);
 
 interface AboutPageProps {
   theme: ThemeSettings;
@@ -79,6 +93,34 @@ export default function AboutPage({ theme, slogans }: AboutPageProps) {
               >
                 {slogans.aboutName || 'Studio Kimecci Team Launcher'}
               </h3>
+              
+              {/* SNS Links */}
+              <div className="flex items-center justify-center space-x-3 pt-3">
+                <a
+                  href={slogans.youtubeUrl || 'https://youtube.com'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-9 h-9 rounded-full bg-zinc-950 border border-zinc-900 flex items-center justify-center text-zinc-400 hover:text-white transition-all cursor-pointer group hover:border-zinc-700"
+                >
+                  <Youtube className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                </a>
+                <a
+                  href={slogans.instagramUrl || 'https://instagram.com'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-9 h-9 rounded-full bg-zinc-950 border border-zinc-900 flex items-center justify-center text-zinc-400 hover:text-white transition-all cursor-pointer group hover:border-zinc-700"
+                >
+                  <Instagram className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                </a>
+                <a
+                  href={slogans.vimeoUrl || 'https://tiktok.com'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-9 h-9 rounded-full bg-zinc-950 border border-zinc-900 flex items-center justify-center text-zinc-400 hover:text-white transition-all cursor-pointer group hover:border-zinc-700"
+                >
+                  <Tiktok className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                </a>
+              </div>
             </div>
           </div>
 
