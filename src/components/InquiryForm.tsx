@@ -6,28 +6,17 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Send, CheckCircle, HelpCircle, Loader2, DollarSign, Briefcase } from 'lucide-react';
-import { Inquiry, ThemeSettings } from '../types';
+import { Inquiry, ThemeSettings, SloganSettings } from '../types';
 
 interface InquiryFormProps {
   theme: ThemeSettings;
   onSubmitInquiry: (inquiry: Omit<Inquiry, 'id' | 'submittedAt' | 'status'>) => void;
+  slogans?: SloganSettings;
+  isSubpage?: boolean;
 }
 
-export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps) {
-  const [formData, setFormData] = useState({
-    companyName: '',
-    contactPerson: '',
-    email: '',
-    phone: '',
-    projectType: '2D 광고 애니메이션',
-    budget: '1,000만원 - 3,000만원',
-    description: '',
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const projectTypes = [
+export default function InquiryForm({ theme, onSubmitInquiry, slogans, isSubpage }: InquiryFormProps) {
+  const projectTypes = slogans?.contactProjectTypes || [
     '소셜 브랜디드 콘텐츠',
     '2D 광고 애니메이션',
     '뮤직비디오',
@@ -36,13 +25,44 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
     '오프라인 강의'
   ];
 
-  const budgetScopes = [
+  const budgetScopes = slogans?.contactBudgets || [
     '500만원 이하',
     '500만원 - 1,000만원',
     '1,000만원 - 3,000만원',
     '3,000만원 - 5,000만원',
     '5,000만원 이상'
   ];
+
+  const [formData, setFormData] = useState({
+    companyName: '',
+    contactPerson: '',
+    email: '',
+    phone: '',
+    projectType: projectTypes[0] || '2D 광고 애니메이션',
+    budget: budgetScopes[0] || '1,000만원 - 3,000만원',
+    description: '',
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  React.useEffect(() => {
+    if (slogans?.contactProjectTypes && slogans.contactProjectTypes.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        projectType: slogans.contactProjectTypes![0]
+      }));
+    }
+  }, [slogans?.contactProjectTypes]);
+
+  React.useEffect(() => {
+    if (slogans?.contactBudgets && slogans.contactBudgets.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        budget: slogans.contactBudgets![0]
+      }));
+    }
+  }, [slogans?.contactBudgets]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -103,88 +123,96 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
   };
 
   return (
-    <section id="inquiry" className="border-t border-zinc-900/60 relative" style={{ paddingTop: '96px', paddingBottom: '80px' }}>
+    <section id="inquiry" className={`relative ${isSubpage ? '' : 'border-t border-zinc-900/60'}`} style={{ paddingTop: isSubpage ? '10px' : '80px', paddingBottom: '80px' }}>
       <div 
         className="absolute top-1/2 left-0 w-96 h-96 rounded-full blur-[160px] opacity-10 pointer-events-none"
         style={{ backgroundColor: theme.accentColor }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-          
-          {/* Informational Guidelines column */}
-          <div className="lg:col-span-5 space-y-8">
-            <div className="space-y-4">
-              <h2 
-                className="text-2xl sm:text-3xl font-extrabold tracking-wider"
-                style={{ color: '#b5b5ba', fontFamily: '"Outfit", sans-serif' }}
-              >
-                CONTACT
-              </h2>
-              <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
-                당신의 브랜드 이야기를 들려주세요<br />
-                가장 의미 있는 이야기를 가장 어울리는 장면으로 세상에 보여드릴게요
-              </p>
-            </div>
+      <motion.div 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative"
+        initial={isSubpage ? { opacity: 0, y: 15 } : undefined}
+        animate={isSubpage ? { opacity: 1, y: 0 } : undefined}
+        transition={isSubpage ? { duration: 0.5, ease: 'easeOut' } : undefined}
+      >
+        {/* If subpage, render description at the top */}
+        {isSubpage && (
+          <div className="w-full text-left mb-10 animate-fade-in">
+            <p 
+              className="text-base sm:text-lg leading-relaxed font-sans whitespace-pre-line"
+              style={{
+                paddingBottom: '0px',
+                paddingTop: '0px',
+                marginLeft: '0px',
+                marginTop: '-11px',
+                color: '#a1a1aa'
+              }}
+            >
+              {slogans?.contactSubtitle || '새로운 이야기의 실마리를 건네주세요. 디렉터들이 직접 꼼꼼히 확인하고 24시간 내에 답변드립니다.'}
+            </p>
+          </div>
+        )}
 
-            {/* Informative list cards */}
-            <div className="space-y-4 font-sans text-sm">
-              <div className="p-5 rounded-xl bg-zinc-900/20 border border-zinc-900 flex space-x-4">
-                <div 
-                  className="w-10 h-10 rounded-lg flex items-center justify-center bg-zinc-900 border border-zinc-800 font-mono font-medium shrink-0"
-                  style={{ color: theme.accentColor }}
-                >
-                  01
+        {/* If subpage, render collaboration steps right below the description */}
+        {isSubpage && (
+          <div className="w-full mb-10 animate-fade-in text-left">
+            <h3 className="text-base sm:text-lg font-semibold text-zinc-400 mb-6 tracking-wide font-sans">
+              협업 프로세스
+            </h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {(slogans?.contactSteps || [
+                { id: '1', num: '01', title: '문의', desc: '제안된 프로젝트의 세부 사항과 예산 범위를 면밀히 검증하여, 신속하게 기획 검토 사항과 제안 보상을 연락드립니다.' },
+                { id: '2', num: '02', title: '기획', desc: '유명한 국방부 시놉시스 계약안과 시놉시스 기반 영상 콘티를 공유해 완벽하게 준비된 계약을 기다리고 있습니다.' },
+                { id: '3', num: '03', title: '제작', desc: '2D 애니메이션 제작, 거대한 후, 오디오 및 프로세스를 편집하는 커뮤니케이션을 통해 정밀하게 완수합니다.' },
+                { id: '4', num: '04', title: '투입', desc: '정밀한 검수를 부담스러운 마스터본 파일을 업로드하거나 가져가서 완성도 있는 결과물을 공유합니다.' }
+              ]).map((step, idx) => (
+                <div key={step.id || idx} className="p-6 rounded-2xl bg-zinc-950/40 border border-zinc-900/80 flex flex-col space-y-4 text-left h-full">
+                   <div className="flex items-center space-x-3 border-b border-zinc-900 pb-3">
+                    <div 
+                      className="flex items-center justify-center w-10 h-10 rounded-xl shrink-0"
+                      style={{ backgroundColor: '#000000', border: '1px solid #27272a' }}
+                    >
+                      <span className="text-sm sm:text-base font-mono font-black" style={{ color: '#ffc92e' }}>
+                        {step.num || String(idx + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <h4 className="text-sm sm:text-base font-black font-sans tracking-tight text-white">
+                      {step.title}
+                    </h4>
+                  </div>
+                  <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed whitespace-pre-line">
+                    {step.desc}
+                  </p>
                 </div>
-                <div>
-                  <h4 className="font-bold text-zinc-200">문의</h4>
-                  <p className="text-xs text-zinc-500 mt-1">제안해주신 프로젝트의 세부 사항과 예산 범위를 면밀히 검증하여, 빠르고 긴밀하게 기획 검토 사항과 제안 피드백을 연락 드립니다.</p>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-xl bg-zinc-900/20 border border-zinc-900 flex space-x-4">
-                <div 
-                  className="w-10 h-10 rounded-lg flex items-center justify-center bg-zinc-900 border border-zinc-800 font-mono font-medium shrink-0"
-                  style={{ color: theme.accentColor }}
-                >
-                  02
-                </div>
-                <div>
-                  <h4 className="font-bold text-zinc-200">기획</h4>
-                  <p className="text-xs text-zinc-500 mt-1">브랜드 맞춤형 시놉시스 기획안과 시놉시스 기반 영상 콘티를 공유해 완성도 있는 기획을 위한 의견을 수립합니다.</p>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-xl bg-zinc-900/20 border border-zinc-900 flex space-x-4">
-                <div 
-                  className="w-10 h-10 rounded-lg flex items-center justify-center bg-zinc-900 border border-zinc-800 font-mono font-medium shrink-0"
-                  style={{ color: theme.accentColor }}
-                >
-                  03
-                </div>
-                <div>
-                  <h4 className="font-bold text-zinc-200">제작</h4>
-                  <p className="text-xs text-zinc-500 mt-1">고화질 2D 애니메이션 제작, 깔끔한 후편집, 음향 및 렌더링 공정을 단계별 소통을 통해 정밀하게 완수합니다.</p>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-xl bg-zinc-900/20 border border-zinc-900 flex space-x-4">
-                <div 
-                  className="w-10 h-10 rounded-lg flex items-center justify-center bg-zinc-900 border border-zinc-800 font-mono font-medium shrink-0"
-                  style={{ color: theme.accentColor }}
-                >
-                  04
-                </div>
-                <div>
-                  <h4 className="font-bold text-zinc-200">업로드</h4>
-                  <p className="text-xs text-zinc-500 mt-1">정밀한 검수를 거친 무손실 마스터본 파일을 업로드 혹은 납품해 완성도 있는 결과물을 공유합니다.</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
+        )}
 
-          {/* Core Interactive Form component */}
-          <div className="lg:col-span-7 bg-zinc-950 border border-zinc-900 p-6 sm:p-10 rounded-2xl relative shadow-2xl">
+        {/* If subpage, render Project Proposal subtitle before the form */}
+        {isSubpage && (
+          <div className="w-full mb-5 text-left animate-fade-in">
+            <h3 className="text-base sm:text-lg font-semibold text-zinc-400 tracking-wide font-sans">
+              프로젝트 제안
+            </h3>
+          </div>
+        )}
+
+        {/* Home page Header (not rendered for subpage anymore, since we have the navbar and description) */}
+        {!isSubpage && (
+          <div className="w-full mb-6">
+            <h2 
+              className="text-2xl sm:text-3xl font-extrabold tracking-wider text-left animate-fade-in"
+              style={{ color: '#b5b5ba', fontFamily: '"Outfit", sans-serif' }}
+            >
+              {slogans?.contactTitle || 'CONTACT'}
+            </h2>
+          </div>
+        )}
+
+        {/* The actual interactive form box */}
+        <div className="max-w-4xl bg-zinc-950 border border-zinc-900 p-6 sm:p-10 rounded-2xl relative shadow-2xl w-full mr-auto">
             
             <AnimatePresence mode="wait">
               {!isSubmitted ? (
@@ -203,7 +231,7 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {/* Company Name */}
                     <div className="space-y-2">
-                       <label className="text-xs font-semibold text-zinc-400 font-sans block">
+                       <label className="text-xs font-semibold text-white font-sans block">
                         회사명 <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -211,7 +239,7 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
                         name="companyName"
                         value={formData.companyName}
                         onChange={handleChange}
-                        placeholder="스튜디오 기메띠"
+                        placeholder={slogans?.contactPlaceholderCompany || '스튜디오 기메띠'}
                         className="w-full h-11 px-4 bg-zinc-900/60 border border-zinc-800 rounded-lg focus:outline-none focus:border-yellow-400 font-sans text-xs text-zinc-300 transition-colors"
                         required
                       />
@@ -219,7 +247,7 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
 
                     {/* Contact Person */}
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-zinc-400 font-sans block">
+                      <label className="text-xs font-semibold text-white font-sans block">
                         이름 <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -227,7 +255,7 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
                         name="contactPerson"
                         value={formData.contactPerson}
                         onChange={handleChange}
-                        placeholder="홍길동"
+                        placeholder={slogans?.contactPlaceholderPerson || '홍길동'}
                         className="w-full h-11 px-4 bg-zinc-900/60 border border-zinc-800 rounded-lg focus:outline-none focus:border-yellow-400 font-sans text-xs text-zinc-300 transition-colors"
                         required
                       />
@@ -237,7 +265,7 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {/* Email */}
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-zinc-400 font-sans block">
+                      <label className="text-xs font-semibold text-white font-sans block">
                         이메일 <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -253,7 +281,7 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
 
                     {/* Phone Number */}
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-zinc-400 font-sans block">
+                      <label className="text-xs font-semibold text-white font-sans block">
                         연락처 <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -271,7 +299,7 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {/* Project Type Selection */}
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-zinc-400 font-sans block">
+                      <label className="text-xs font-semibold text-white font-sans block">
                         의뢰 유형 <span className="text-red-500">*</span>
                       </label>
                       <select
@@ -290,7 +318,7 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
 
                      {/* Estimated Budget Scope */}
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-zinc-400 font-sans block">
+                      <label className="text-xs font-semibold text-white font-sans block">
                         예산 범위 <span className="text-red-500">*</span>
                       </label>
                       <select
@@ -310,7 +338,7 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
 
                    {/* Project Details Description */}
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-400 font-sans block">
+                    <label className="text-xs font-semibold text-white font-sans block">
                       프로젝트 세부 내용 <span className="text-red-500">*</span>
                     </label>
                     <textarea
@@ -329,10 +357,18 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full h-12 rounded-xl text-xs font-bold font-sans cursor-pointer flex items-center justify-center space-x-2 shadow-xl tracking-wider transition-all duration-300 hover:brightness-110 active:scale-98 disabled:opacity-50"
+                      className="w-full h-12 rounded-xl border bg-black text-xs font-bold font-sans cursor-pointer flex items-center justify-center space-x-2 shadow-xl tracking-wider transition-all duration-300 disabled:opacity-50"
                       style={{
-                        backgroundColor: theme.accentColor,
-                        color: theme.backgroundColor
+                        borderColor: '#ffc92e',
+                        color: '#ffc92e',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#ffc92e';
+                        e.currentTarget.style.color = '#000000';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#000000';
+                        e.currentTarget.style.color = '#ffc92e';
                       }}
                     >
                       {isSubmitting ? (
@@ -342,8 +378,8 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
                         </>
                       ) : (
                         <>
-                          <Send className="w-4 h-4" />
-                          <span>프로젝트 제안하기</span>
+                          <Send className="w-4 h-4" style={{ color: 'inherit' }} />
+                          <span>{slogans?.contactBtnText || '프로젝트 제안하기'}</span>
                         </>
                       )}
                     </button>
@@ -380,9 +416,7 @@ export default function InquiryForm({ theme, onSubmitInquiry }: InquiryFormProps
             </AnimatePresence>
 
           </div>
-
-        </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ExternalLink, Film, Award, Tag, Calendar, User, Eye, X } from 'lucide-react';
+import { ExternalLink, Film, Award, Tag, Calendar, User, Eye, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Project, ThemeSettings } from '../types';
 import { CATEGORIES } from '../data';
 import { getEmbedUrl } from '../utils';
@@ -13,14 +13,30 @@ import { getEmbedUrl } from '../utils';
 interface PortfolioGridProps {
   projects: Project[];
   theme: ThemeSettings;
+  isWorkPage?: boolean;
 }
 
-export default function PortfolioGrid({ projects, theme }: PortfolioGridProps) {
+export default function PortfolioGrid({ projects, theme, isWorkPage }: PortfolioGridProps) {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [currentSlide, setCurrentSlide] = useState<number>(0);
   const [showAll, setShowAll] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [initialLimit, setInitialLimit] = useState(6);
+  const [isVertical, setIsVertical] = useState(false);
+
+  React.useEffect(() => {
+    setCurrentSlide(0);
+    if (selectedProject?.imageUrl) {
+      const img = new Image();
+      img.onload = () => {
+        setIsVertical(img.height > img.width);
+      };
+      img.src = selectedProject.imageUrl;
+    } else {
+      setIsVertical(false);
+    }
+  }, [selectedProject]);
 
   // Monitor screen size for accurate responsive row constraints
   React.useEffect(() => {
@@ -56,27 +72,34 @@ export default function PortfolioGrid({ projects, theme }: PortfolioGridProps) {
     ? visibleProjects
     : visibleProjects.filter((project) => project.category === activeCategory);
 
-  const displayedProjects = showAll ? filteredProjects : filteredProjects.slice(0, initialLimit);
+  const displayedProjects = (showAll || isWorkPage) ? filteredProjects : filteredProjects.slice(0, initialLimit);
 
   return (
-    <section id="portfolio" className="pt-8 pb-20 border-t border-zinc-900/40 relative">
+    <section id="portfolio" className={`pb-0 relative ${isWorkPage ? 'pt-2' : 'pt-8 border-t border-zinc-900/40'}`} style={{ paddingTop: isWorkPage ? '1px' : undefined }}>
       <div 
         className="absolute bottom-1/4 right-0 w-80 h-80 rounded-full blur-[150px] opacity-10 pointer-events-none"
         style={{ backgroundColor: theme.accentColor }}
       />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <motion.div 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative"
+        initial={isWorkPage ? { opacity: 0, y: 15 } : undefined}
+        animate={isWorkPage ? { opacity: 1, y: 0 } : undefined}
+        transition={isWorkPage ? { duration: 0.5, ease: 'easeOut' } : undefined}
+      >
         
         {/* Header Block */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 space-y-6 md:space-y-0">
-          <div>
-            <h2 
-              className="text-2xl sm:text-3xl font-extrabold tracking-wider"
-              style={{ color: '#b5b5ba', fontFamily: '"Outfit", sans-serif' }}
-            >
-              WORK
-            </h2>
-          </div>
+        <div className={`flex flex-col md:flex-row md:items-end ${isWorkPage ? 'justify-start mb-10' : 'justify-between mb-16'} space-y-6 md:space-y-0`}>
+          {!isWorkPage && (
+            <div style={{ marginLeft: '0px', marginTop: '-5px' }}>
+              <h2 
+                className="text-2xl sm:text-3xl font-extrabold tracking-wider"
+                style={{ color: '#b5b5ba', fontFamily: '"Outfit", sans-serif' }}
+              >
+                WORK
+              </h2>
+            </div>
+          )}
 
           {/* Dynamic Filter Categories Bar */}
           <div className="flex flex-wrap gap-2 bg-zinc-900/40 p-1.5 border border-zinc-900 rounded-xl overflow-x-auto scrollbar-none">
@@ -86,8 +109,8 @@ export default function PortfolioGrid({ projects, theme }: PortfolioGridProps) {
                 onClick={() => setActiveCategory(category.id)}
                 className="px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 whitespace-nowrap"
                 style={{
-                  backgroundColor: activeCategory === category.id ? theme.accentColor : 'transparent',
-                  color: activeCategory === category.id ? theme.backgroundColor : '#8e8e93',
+                  backgroundColor: activeCategory === category.id ? '#ffc92e' : 'transparent',
+                  color: activeCategory === category.id ? '#000000' : '#8e8e93',
                 }}
               >
                 {category.label}
@@ -111,11 +134,13 @@ export default function PortfolioGrid({ projects, theme }: PortfolioGridProps) {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 className="inline-block w-full mb-8 break-inside-avoid group relative cursor-pointer"
-                onClick={() => setSelectedProject(project)}
+                onClick={() => {
+                  setSelectedProject(project);
+                }}
               >
                 {/* Image-only thumbnail with custom border radius */}
                 <div 
-                  className={`relative overflow-hidden w-full ${project.videoAspectRatio === '9:16' ? 'aspect-[9/16]' : 'aspect-[16/10]'} bg-zinc-950 border border-zinc-900/60 shadow-xl transition-all duration-300`}
+                  className="relative overflow-hidden w-full h-auto bg-zinc-950 border border-zinc-900/60 shadow-xl transition-all duration-300"
                   style={{
                     borderRadius: theme.borderRadius === 'none' ? '0px' : theme.borderRadius === 'sm' ? '4px' : theme.borderRadius === 'md' ? '8px' : theme.borderRadius === 'lg' ? '16px' : '24px'
                   }}
@@ -124,7 +149,7 @@ export default function PortfolioGrid({ projects, theme }: PortfolioGridProps) {
                     referrerPolicy="no-referrer"
                     src={project.imageUrl}
                     alt={project.title}
-                    className="w-full h-full object-cover transform duration-700 ease-out group-hover:scale-105 group-hover:brightness-[0.4] transition-all"
+                    className="w-full h-auto block transform duration-700 ease-out group-hover:scale-105 group-hover:brightness-[0.4] transition-all"
                   />
 
                   {/* Elegant overlay revealed on hover */}
@@ -155,7 +180,7 @@ export default function PortfolioGrid({ projects, theme }: PortfolioGridProps) {
         </motion.div>
 
         {/* MORE Button Box below the list */}
-        {!showAll && filteredProjects.length > initialLimit && (
+        {!showAll && !isWorkPage && filteredProjects.length > initialLimit && (
           <div className="flex justify-center mt-12">
             <button
               onClick={() => setShowAll(true)}
@@ -177,9 +202,7 @@ export default function PortfolioGrid({ projects, theme }: PortfolioGridProps) {
           </div>
         )}
 
-      </div>
-
-      {/* Cinematic Modal details popup */}
+      </motion.div>
       <AnimatePresence>
         {selectedProject && (
           <motion.div
@@ -210,44 +233,142 @@ export default function PortfolioGrid({ projects, theme }: PortfolioGridProps) {
               <div className="grid grid-cols-1 md:grid-cols-12 items-center">
                 
                 {/* Media area */}
-                <div className={`${selectedProject.videoAspectRatio === '9:16' ? 'md:col-span-12 lg:col-span-5 p-6' : 'md:col-span-12 lg:col-span-7'} bg-zinc-900 border-b lg:border-b-0 lg:border-r border-zinc-900 flex flex-col justify-center`}>
-                  <div className={`${selectedProject.videoAspectRatio === '9:16' ? 'aspect-[9/16] w-full max-w-[280px] sm:max-w-[320px] mx-auto rounded-xl overflow-hidden' : 'relative aspect-video w-full'} bg-black`}>
-                    {(() => {
-                      const embed = getEmbedUrl(selectedProject.videoUrl);
-                      if (embed.type === 'video') {
-                        return (
-                          <video
-                            src={embed.url}
-                            className="w-full h-full object-cover"
-                            controls
-                            autoPlay
-                            playsInline
-                          />
-                        );
-                      }
-                      if (embed.type === 'iframe') {
-                        return (
-                          <iframe
-                            src={embed.url}
-                            title={selectedProject.title}
-                            className="w-full h-full border-0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen
-                          ></iframe>
-                        );
-                      }
-                      return (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-zinc-500 font-sans p-6 text-center text-xs">
-                          <Film className="w-8 h-8 mb-2 opacity-30" />
-                          <p>재생 가능한 비디오 리소스가 없습니다.</p>
+                <div className={`${isVertical ? 'md:col-span-12 lg:col-span-5 p-6' : 'md:col-span-12 lg:col-span-7'} bg-zinc-900 border-b lg:border-b-0 lg:border-r border-zinc-900 flex flex-col justify-center`}>
+                  {selectedProject.mediaList && selectedProject.mediaList.length > 0 ? (
+                    selectedProject.galleryViewType === 'slider' ? (
+                      /* ---------------- HORIZONTAL SLIDER Carousel MODE ---------------- */
+                      <div className="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+                        <div className="w-full h-full flex items-center justify-center">
+                          {(() => {
+                            const media = selectedProject.mediaList[currentSlide];
+                            if (!media) return null;
+                            if (media.type === 'video') {
+                              const embed = getEmbedUrl(media.url);
+                              return (
+                                <div className="w-full h-full relative">
+                                  {embed.type === 'video' ? (
+                                    <video src={embed.url} className="w-full h-full object-contain" controls autoPlay playsInline />
+                                  ) : embed.type === 'iframe' ? (
+                                    <iframe src={embed.url} className="w-full h-full border-0" allow="autoplay; encrypted-media" allowFullScreen title="video" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-zinc-600 text-xs font-sans">비디오 재생 불가</div>
+                                  )}
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <img
+                                  src={media.url}
+                                  alt={`Slide ${currentSlide + 1}`}
+                                  className="w-full h-full object-contain"
+                                  referrerPolicy="no-referrer"
+                                />
+                              );
+                            }
+                          })()}
                         </div>
-                      );
-                    })()}
-                  </div>
+
+                        {/* Navigation Chevron Buttons */}
+                        {selectedProject.mediaList.length > 1 && (
+                          <>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCurrentSlide(prev => prev > 0 ? prev - 1 : selectedProject.mediaList!.length - 1);
+                              }}
+                              className="absolute left-3 p-2 rounded-full bg-black/70 border border-zinc-800/80 hover:bg-zinc-800 text-white transition-all cursor-pointer shadow-md z-20"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCurrentSlide(prev => prev < selectedProject.mediaList!.length - 1 ? prev + 1 : 0);
+                              }}
+                              className="absolute right-3 p-2 rounded-full bg-black/70 border border-zinc-800/80 hover:bg-zinc-800 text-white transition-all cursor-pointer shadow-md z-20"
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                            
+                            {/* Fraction Indicator */}
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center bg-black/60 border border-zinc-800/40 px-3 py-1 rounded-full text-[10px] font-mono font-bold text-zinc-300 z-20 select-none shadow-sm">
+                              {currentSlide + 1} / {selectedProject.mediaList.length}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      /* ---------------- VERTICAL MOUSE WHEEL SCROLL MODE ---------------- */
+                      <div className="w-full overflow-y-auto max-h-[60vh] sm:max-h-[70vh] p-4 space-y-4 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+                        {selectedProject.mediaList.map((media, idx) => (
+                          <div key={media.id || idx} className="w-full bg-black rounded-xl overflow-hidden border border-zinc-900 flex flex-col justify-center">
+                            {media.type === 'video' ? (
+                              <div className="relative aspect-video w-full">
+                                {(() => {
+                                  const embed = getEmbedUrl(media.url);
+                                  if (embed.type === 'video') {
+                                    return <video src={embed.url} className="w-full h-full object-cover" controls playsInline />;
+                                  } else if (embed.type === 'iframe') {
+                                    return <iframe src={embed.url} className="w-full h-full border-0" allow="autoplay; encrypted-media" allowFullScreen title="video" />;
+                                  } else {
+                                    return (
+                                      <div className="w-full h-full flex items-center justify-center text-zinc-600 text-xs">재생 불가 비디오</div>
+                                    );
+                                  }
+                                })()}
+                              </div>
+                            ) : (
+                              <img
+                                src={media.url}
+                                alt={`media-${idx}`}
+                                className="w-full h-auto object-contain max-h-[500px]"
+                                referrerPolicy="no-referrer"
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  ) : (
+                    /* ---------------- FALLBACK SINGLE VIDEO/IMAGE PLAYBACK ---------------- */
+                    <div className={`${isVertical ? 'aspect-[9/16] w-full max-w-[280px] sm:max-w-[320px] mx-auto rounded-xl overflow-hidden' : 'relative aspect-video w-full'} bg-black`}>
+                      {(() => {
+                        const embed = getEmbedUrl(selectedProject.videoUrl);
+                        if (embed.type === 'video') {
+                          return (
+                            <video
+                              src={embed.url}
+                              className="w-full h-full object-cover"
+                              controls
+                              autoPlay
+                              playsInline
+                            />
+                          );
+                        }
+                        if (embed.type === 'iframe') {
+                          return (
+                            <iframe
+                              src={embed.url}
+                              title={selectedProject.title}
+                              className="w-full h-full border-0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              allowFullScreen
+                            ></iframe>
+                          );
+                        }
+                        return (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-zinc-500 font-sans p-6 text-center text-xs">
+                            <Film className="w-8 h-8 mb-2 opacity-30" />
+                            <p>재생 가능한 비디오 리소스가 없습니다.</p>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
 
                 {/* Details area */}
-                <div className={`${selectedProject.videoAspectRatio === '9:16' ? 'md:col-span-12 lg:col-span-7' : 'md:col-span-12 lg:col-span-5'} p-6 md:p-8 flex flex-col justify-between max-h-[80vh] overflow-y-auto`}>
+                <div className={`${isVertical ? 'md:col-span-12 lg:col-span-7' : 'md:col-span-12 lg:col-span-5'} p-6 md:p-8 flex flex-col justify-between max-h-[80vh] overflow-y-auto`}>
                   <div className="space-y-6">
                     <div>
                       <div className="inline-block px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase mb-3 text-zinc-950" style={{ backgroundColor: theme.accentColor }}>

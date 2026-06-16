@@ -47,12 +47,12 @@ export default function Footer({ theme, slogans, scrollToSection }: FooterProps)
                 <img 
                   src={slogans.footerLogoUrl || slogans.logoUrl} 
                   alt="Logo" 
-                  className="h-8 w-auto rounded-md object-contain select-none"
+                  className="h-16 w-auto rounded-md object-contain select-none"
                   referrerPolicy="no-referrer"
                 />
               ) : (
                 <div 
-                  className="w-8 h-8 rounded-lg flex items-center justify-center font-display font-black text-base select-none"
+                  className="w-16 h-16 rounded-lg flex items-center justify-center font-display font-black text-3xl select-none"
                   style={{
                     backgroundColor: theme.accentColor,
                     color: theme.backgroundColor
@@ -74,7 +74,7 @@ export default function Footer({ theme, slogans, scrollToSection }: FooterProps)
             <div className="space-y-4 font-sans text-xs text-zinc-500 w-full pt-1">
               <div className="text-left leading-relaxed">
                 <span className="text-zinc-650 font-bold block uppercase text-[9px] tracking-widest text-zinc-600 mb-1">BUSINESS ADDRESS</span>
-                {slogans.footerAddress || '서울특별시 중구 다산로 210 스튜디오기메띠 아틀리에 빌딩 4F'}
+                {slogans.footerAddress || '서울특별시 중구 다산로 210 스튜디오 키메찌 아틀리에 빌딩 4F'}
               </div>
               
               <div className="flex flex-col sm:flex-row sm:space-x-8 space-y-4 sm:space-y-0 w-full pt-1">

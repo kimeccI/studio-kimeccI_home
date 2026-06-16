@@ -326,15 +326,23 @@ export default function Showreel({ slogans, theme }: ShowreelProps) {
               />
             )}
 
+            {/* Fade-in from black on start/transition */}
+            <motion.div
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 0 }}
+              transition={{ duration: 1.5, ease: 'easeOut' }}
+              className="absolute inset-0 bg-black pointer-events-none z-[25]"
+            />
+
             {/* Natural gradient blackout at the bottom of the video */}
             <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black via-black/85 to-transparent pointer-events-none z-10" />
 
             {/* Main Brand Slogan positioned in the blackout part of the video */}
             {slogans.sloganSubtitle && (
-              <div id="main-brand-slogan" className="absolute inset-x-0 bottom-6 sm:bottom-10 md:bottom-14 lg:bottom-18 z-20 pointer-events-none select-none">
+              <div id="main-brand-slogan" className="absolute inset-x-0 bottom-2 sm:bottom-10 md:bottom-14 lg:bottom-18 z-20 pointer-events-none select-none">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                   <p 
-                    className="text-zinc-200 text-[19px] sm:text-[21px] md:text-[22px] lg:text-[23px] font-normal leading-relaxed opacity-95 select-none text-left whitespace-pre-wrap"
+                    className="text-zinc-200 text-[12.5px] xs:text-[14.5px] sm:text-[21px] md:text-[22px] lg:text-[23px] font-normal leading-snug sm:leading-relaxed opacity-95 select-none text-left whitespace-pre-wrap"
                     style={{ 
                       fontFamily: '"Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', 
                       letterSpacing: '-0.01em',

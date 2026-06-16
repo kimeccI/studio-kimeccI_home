@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import Showreel from './components/Showreel';
 import PortfolioGrid from './components/PortfolioGrid';
 import InquiryForm from './components/InquiryForm';
+import AboutPage from './components/AboutPage';
 import AdminDashboard from './components/AdminDashboard';
 import Footer from './components/Footer';
 
@@ -31,6 +32,9 @@ export default function App() {
             if ((p.category as string) === 'brand') {
               return { ...p, category: 'ad' };
             }
+            if ((p.category as string) === 'motion') {
+              return { ...p, category: 'design' };
+            }
             return p;
           });
         }
@@ -46,7 +50,7 @@ export default function App() {
       const saved = localStorage.getItem('kimecci_theme') || 
                     localStorage.getItem('gimetti_theme') || 
                     localStorage.getItem('theme');
-      return saved ? JSON.parse(saved) : DEFAULT_THEME;
+      return saved ? { ...DEFAULT_THEME, ...JSON.parse(saved) } : DEFAULT_THEME;
     } catch {
       return DEFAULT_THEME;
     }
@@ -57,7 +61,17 @@ export default function App() {
       const saved = localStorage.getItem('kimecci_slogans') || 
                     localStorage.getItem('gimetti_slogans') || 
                     localStorage.getItem('slogans');
-      return saved ? JSON.parse(saved) : DEFAULT_SLOGANS;
+      if (saved) {
+        const parsed = JSON.parse(saved) as SloganSettings;
+        if (!parsed.contactTitle || parsed.contactTitle.includes('PROJECT PROPOSAL') || parsed.contactTitle.includes('협업 제안서')) {
+          parsed.contactTitle = 'CONTACT';
+        }
+        if (!parsed.contactBtnText || parsed.contactBtnText === '프로포절 발송하기') {
+          parsed.contactBtnText = '프로젝트 제안하기';
+        }
+        return { ...DEFAULT_SLOGANS, ...parsed };
+      }
+      return DEFAULT_SLOGANS;
     } catch {
       return DEFAULT_SLOGANS;
     }
@@ -75,6 +89,19 @@ export default function App() {
   });
 
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<string>('');
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const page = params.get('page');
+      if (page) {
+        setCurrentPage(page);
+      }
+    } catch (e) {
+      console.warn('URL parsing error:', e);
+    }
+  }, []);
 
   // Sync with LocalStorage
   useEffect(() => {
@@ -133,6 +160,23 @@ export default function App() {
     root.style.setProperty('--theme-accent-rgb', hexToRgb(theme.accentColor));
   }, [theme]);
 
+  // Synchronize Tab title & favicon dynamically
+  useEffect(() => {
+    document.title = slogans.siteTitle || 'studio kimeccI';
+  }, [slogans.siteTitle]);
+
+  useEffect(() => {
+    if (slogans.faviconUrl) {
+      let link = document.querySelector("link[rel*='icon']") as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = slogans.faviconUrl;
+    }
+  }, [slogans.faviconUrl]);
+
   // Custom smooth scrolling logic with mode switcher fallback
   const scrollToSection = (id: string) => {
     if (isAdmin) {
@@ -190,6 +234,8 @@ export default function App() {
         slogans={slogans}
         theme={theme}
         scrollToSection={scrollToSection}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
 
       {/* Floating Status Indicator of Demo Customization */}
@@ -214,20 +260,7 @@ export default function App() {
 
       {/* CORE VIEW STAGES ROUTER */}
       <main className="relative z-10">
-        {!isAdmin ? (
-          <>
-            {/* 1. HERO & SHOWREEL */}
-            <div id="hero" className="relative pt-0 pb-0">
-              <Showreel slogans={slogans} theme={theme} />
-            </div>
-
-            {/* 2. PORTFOLIO ARCHIVES */}
-            <PortfolioGrid projects={projects} theme={theme} />
-
-            {/* 3. BUSINESS INQUIRY */}
-            <InquiryForm theme={theme} onSubmitInquiry={handleAddInquiry} />
-          </>
-        ) : (
+        {isAdmin ? (
           /* ADMIN WORKSPACE */
           <div className="py-8">
             <AdminDashboard
@@ -242,6 +275,31 @@ export default function App() {
               setIsAdmin={setIsAdmin}
             />
           </div>
+        ) : currentPage ? (
+          <div className="pt-8 pb-6" style={{ paddingTop: currentPage === 'work' ? '33px' : undefined }}>
+            {currentPage === 'about' && (
+              <AboutPage slogans={slogans} theme={theme} />
+            )}
+            {currentPage === 'work' && (
+              <PortfolioGrid projects={projects} theme={theme} isWorkPage={true} />
+            )}
+            {currentPage === 'contact' && (
+              <InquiryForm theme={theme} onSubmitInquiry={handleAddInquiry} slogans={slogans} isSubpage={true} />
+            )}
+          </div>
+        ) : (
+          <>
+            {/* 1. HERO & SHOWREEL */}
+            <div id="hero" className="relative pt-0 pb-0">
+              <Showreel slogans={slogans} theme={theme} />
+            </div>
+
+            {/* 2. PORTFOLIO ARCHIVES */}
+            <PortfolioGrid projects={projects} theme={theme} />
+
+            {/* 3. BUSINESS INQUIRY */}
+            <InquiryForm theme={theme} onSubmitInquiry={handleAddInquiry} slogans={slogans} />
+          </>
         )}
       </main>
 

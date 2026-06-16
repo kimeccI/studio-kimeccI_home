@@ -13,6 +13,8 @@ interface NavbarProps {
   slogans: SloganSettings;
   theme: ThemeSettings;
   scrollToSection: (id: string) => void;
+  currentPage: string;
+  setCurrentPage: (page: string) => void;
 }
 
 export default function Navbar({
@@ -20,18 +22,49 @@ export default function Navbar({
   setIsAdmin,
   slogans,
   theme,
-  scrollToSection
+  scrollToSection,
+  currentPage,
+  setCurrentPage
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Helper to convert hex to rgba with customizable opacity
+  const getTransparentColor = (hex: string, opacity: number): string => {
+    if (!hex || !hex.startsWith('#')) return hex;
+    const h = hex.replace('#', '');
+    if (h.length === 3) {
+      const r = parseInt(h[0] + h[0], 16);
+      const g = parseInt(h[1] + h[1], 16);
+      const b = parseInt(h[2] + h[2], 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    if (h.length === 6) {
+      const r = parseInt(h.substring(0, 2), 16);
+      const g = parseInt(h.substring(2, 4), 16);
+      const b = parseInt(h.substring(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    return hex;
+  };
+
   const navItems = [
-    { label: 'ABOUT', id: 'about-anchor', icon: Film },
-    { label: 'WORK', id: 'portfolio', icon: Compass },
-    { label: 'CONTACT', id: 'inquiry', icon: MessageCircle },
+    { label: 'ABOUT', page: 'about', icon: Film },
+    { label: 'WORK', page: 'work', icon: Compass },
+    { label: 'CONTACT', page: 'contact', icon: MessageCircle },
   ];
 
-  const handleNavClick = (id: string) => {
-    scrollToSection(id);
+  const handleNavClick = (page: string, e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setIsAdmin(false);
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setMobileMenuOpen(false);
+  };
+
+  const handleLogoClick = () => {
+    setIsAdmin(false);
+    setCurrentPage('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setMobileMenuOpen(false);
   };
 
@@ -40,9 +73,10 @@ export default function Navbar({
       id="main-navbar"
       className="sticky top-0 z-50 transition-all duration-300 border-b"
       style={{
-        backgroundColor: `${theme.backgroundColor}dd`,
+        backgroundColor: getTransparentColor(theme.backgroundColor, 0.6),
         borderColor: 'rgba(255, 255, 255, 0.08)',
-        backdropFilter: 'blur(12px)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -50,7 +84,7 @@ export default function Navbar({
           
           {/* Logo */}
           <div 
-            onClick={() => handleNavClick('hero')} 
+            onClick={handleLogoClick} 
             className="flex items-center cursor-pointer group"
           >
             {(slogans.headerLogoUrl || slogans.logoUrl) ? (
@@ -76,12 +110,18 @@ export default function Navbar({
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => {
+              const worksOnPage = currentPage === item.page;
               return (
                 <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.id)}
-                  className="text-sm tracking-widest transition-opacity duration-200 cursor-pointer text-white hover:opacity-80"
-                  style={{ fontFamily: '"Outfit", sans-serif', fontWeight: 600 }}
+                  key={item.label}
+                  onClick={(e) => handleNavClick(item.page, e)}
+                  className="text-sm tracking-widest transition-all duration-200 cursor-pointer hover:opacity-100 relative top-[3px]"
+                  style={{ 
+                    fontFamily: '"Outfit", sans-serif', 
+                    fontWeight: 600,
+                    color: worksOnPage ? '#ffc92e' : '#ffffff',
+                    opacity: worksOnPage ? 1 : 0.75
+                  }}
                 >
                   <span>{item.label}</span>
                 </button>
@@ -154,12 +194,17 @@ export default function Navbar({
         >
           <div className="px-2 pt-3 pb-6 space-y-2">
             {navItems.map((item) => {
+              const worksOnPage = currentPage === item.page;
               return (
                 <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.id)}
-                  className="w-full text-left px-4 py-3 rounded-lg text-base text-white hover:bg-zinc-900 transition-colors"
-                  style={{ fontFamily: '"Outfit", sans-serif', fontWeight: 600 }}
+                  key={item.label}
+                  onClick={(e) => handleNavClick(item.page, e)}
+                  className="block w-full text-left px-4 py-3 rounded-lg text-base transition-colors hover:bg-zinc-900"
+                  style={{ 
+                    fontFamily: '"Outfit", sans-serif', 
+                    fontWeight: 600,
+                    color: worksOnPage ? '#ffc92e' : '#ffffff',
+                  }}
                 >
                   <span>{item.label}</span>
                 </button>

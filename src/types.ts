@@ -3,11 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export interface ProjectMedia {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+  name?: string;
+}
+
 export interface Project {
   id: string;
   title: string;
   description: string;
-  category: 'ad' | 'motion' | 'art';
+  category: 'ad' | 'mv' | 'art' | 'design' | 'motion';
   imageUrl: string;
   videoUrl: string; // YouTube or Vimeo embed url / mock player URL
   client: string; // 협업 기업명
@@ -15,6 +22,8 @@ export interface Project {
   tags: string[];
   videoAspectRatio?: '16:9' | '9:16';
   hidden?: boolean;
+  galleryViewType?: 'scroll' | 'slider';
+  mediaList?: ProjectMedia[];
 }
 
 export interface ThemeSettings {
@@ -36,6 +45,7 @@ export interface SloganSettings {
   logoUrl?: string;
   headerLogoUrl?: string;
   footerLogoUrl?: string;
+  faviconUrl?: string;
   footerText?: string;
   footerAddress?: string;
   footerPhone?: string;
@@ -43,6 +53,38 @@ export interface SloganSettings {
   youtubeUrl?: string;
   instagramUrl?: string;
   vimeoUrl?: string;
+
+  // ABOUT Page configs
+  aboutText?: string;
+  aboutTextSize?: string;
+  aboutTextColor?: string;
+  aboutTextFont?: 'sans' | 'display' | 'mono';
+  
+  aboutImage?: string;
+  
+  aboutName?: string;
+  aboutNameSize?: string;
+  aboutNameColor?: string;
+  aboutNameFont?: 'sans' | 'display' | 'mono';
+  
+  aboutHistory?: string;
+  aboutHistorySize?: string;
+  aboutHistoryColor?: string;
+  aboutHistoryFont?: 'sans' | 'display' | 'mono';
+  
+  aboutCareer?: string;
+  aboutProjects?: string;
+
+  // CONTACT Page configs
+  contactTitle?: string;
+  contactSubtitle?: string;
+  contactPlaceholderCompany?: string;
+  contactPlaceholderPerson?: string;
+  contactBtnText?: string;
+
+  contactSteps?: Array<{ id: string; num: string; title: string; desc: string }>;
+  contactProjectTypes?: string[];
+  contactBudgets?: string[];
 }
 
 export interface Inquiry {

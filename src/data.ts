@@ -9,7 +9,7 @@ export const CATEGORIES = [
   { id: 'all', label: 'ALL' },
   { id: 'ad', label: 'COMMERCIAL' },
   { id: 'art', label: 'PERSONAL' },
-  { id: 'motion', label: 'DESIGN' },
+  { id: 'design', label: 'DESIGN' },
 ];
 
 export const INITIAL_PROJECTS: Project[] = [
@@ -29,7 +29,7 @@ export const INITIAL_PROJECTS: Project[] = [
     id: '2',
     title: '현대 프리미엄 카드 브랜드 컬처 비주얼라이저',
     description: '프리미엄 세대의 라이프스타일과 트렌드를 재해석한 브랜드 애니메이션입니다. 역동적인 타이포그래피와 미니멀한 라인 드로잉 기법을 믹스하여 브랜드 고유의 컬러와 모던함을 강조했습니다.',
-    category: 'motion',
+    category: 'design',
     imageUrl: 'https://images.unsplash.com/photo-1618005198143-d3667530288e?auto=format&fit=crop&q=80&w=1200',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&loop=1',
     client: 'Hyundai Card',
@@ -41,7 +41,7 @@ export const INITIAL_PROJECTS: Project[] = [
     id: '3',
     title: '네이버 ZEPETO 메타버스 버추얼 아이콘 캐릭터 쇼츠',
     description: '제페토 메타버스 월드 속 인기 캐릭터 라인업의 공식 프레스티지 비주얼 무비입니다. 최적화된 리깅과 수작업 키프레임 기법으로 감성적이고 통통 튀는 움직임을 표현하여 탄탄한 팬덤 경험을 제공합니다.',
-    category: 'motion',
+    category: 'design',
     imageUrl: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&q=80&w=1200',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&loop=1',
     client: 'Naver Z',
@@ -77,7 +77,7 @@ export const INITIAL_PROJECTS: Project[] = [
     id: '6',
     title: '카카오 미니프렌즈 데일리 무드 툰 및 인터렉션 리소시스',
     description: '일상 복잡함을 날려줄 아기자기한 감성의 미니프렌즈 일상 시퀀스입니다. 자체 개발한 핸드헬드 스케치 효과 필터와 부드러운 스쿼시&스트레치 물리 법칙을 설계하여 사랑스러움을 불어넣었습니다.',
-    category: 'motion',
+    category: 'design',
     imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80/w=1200',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&loop=1',
     client: 'Kakao Space Corp',
@@ -97,7 +97,7 @@ export const DEFAULT_THEME: ThemeSettings = {
 };
 
 export const DEFAULT_SLOGANS: SloganSettings = {
-  siteTitle: '스튜디오 키메찌',
+  siteTitle: 'studio kimeccI',
   sloganTitle: '우리는 감각을 움직이고,\n이야기를 생동하게 합니다.',
   sloganSubtitle: 'Studio Kimecci는 글로벌 광고 애니메이션, 3D/2D 모션그래픽, 버추얼 브랜드 아이덴티티를 혁신하는 하이엔드 비주얼 크리에이티브 디자인 그룹입니다.',
   bannerTitle: 'LET\'S ANIMATE TOGETHER',
@@ -112,7 +112,53 @@ export const DEFAULT_SLOGANS: SloganSettings = {
   footerEmail: 'directors@kimecci.com',
   youtubeUrl: 'https://youtube.com',
   instagramUrl: 'https://instagram.com',
-  vimeoUrl: 'https://tiktok.com'
+  vimeoUrl: 'https://tiktok.com',
+
+  // ABOUT default settings
+  aboutText: 'Founded in 2024, Studio kimecci is a small 2D animation studio creating music video, commercial or personal animated film. We are very interested in the process of what I want to tell becoming the story I want to hear.',
+  aboutTextSize: '18px',
+  aboutTextColor: '#dddddd',
+  aboutTextFont: 'sans',
+  aboutImage: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600',
+  aboutName: 'Studio Kimecci (스튜디오 키메찌)',
+  aboutNameSize: '24px',
+  aboutNameColor: '#ffc92e',
+  aboutNameFont: 'display',
+  aboutHistory: '2026 — SBS Pride in Animation Gold Prize Winner\n2025 — Hyundai Card Brand Vision Project Partner\n2025 — Generative Media Project at Spectrum Festival\n2024 — Studio Kimecci Artists Coop Founded in Seoul',
+  aboutCareer: '2026 — SBS Pride in Animation Gold Prize Winner\n2024 — Studio Kimecci Artists Coop Founded in Seoul',
+  aboutProjects: '2025 — Hyundai Card Brand Vision Project Partner\n2025 — Generative Media Project at Spectrum Festival\n2024 — Special Clip for Naver Z 버추얼 아이콘',
+  aboutHistorySize: '15px',
+  aboutHistoryColor: '#a1a1aa',
+  aboutHistoryFont: 'sans',
+
+  // CONTACT default settings
+  contactTitle: 'CONTACT',
+  contactSubtitle: '새로운 이야기의 실마리를 건네주세요. 디렉터들이 직접 꼼꼼히 확인하고 24시간 내에 답변드립니다.',
+  contactPlaceholderCompany: '회사명 혹은 소속 단체',
+  contactPlaceholderPerson: '성함 및 직함',
+  contactBtnText: '프로젝트 제안하기',
+
+  contactProjectTypes: [
+    '소셜 브랜디드 콘텐츠',
+    '2D 광고 애니메이션',
+    '뮤직비디오',
+    '로고 디자인',
+    '캐릭터 디자인',
+    '오프라인 강의'
+  ],
+  contactBudgets: [
+    '500만원 이하',
+    '500만원 - 1,000만원',
+    '1,000만원 - 3,000만원',
+    '3,000만원 - 5,000만원',
+    '5,000만원 이상'
+  ],
+  contactSteps: [
+    { id: '1', num: '01', title: '문의', desc: '제안된 프로젝트의 세부 사항과 예산 범위를 면밀히 검증하여, 신속하게 기획 검토 사항과 제안 보상을 연락드립니다.' },
+    { id: '2', num: '02', title: '기획', desc: '유명한 국방부 시놉시스 계약안과 시놉시스 기반 영상 콘티를 공유해 완벽하게 준비된 계약을 기다리고 있습니다.' },
+    { id: '3', num: '03', title: '제작', desc: '2D 애니메이션 제작, 거대한 후, 오디오 및 프로세스를 편집하는 커뮤니케이션을 통해 정밀하게 완수합니다.' },
+    { id: '4', num: '04', title: '투입', desc: '정밀한 검수를 부담스러운 마스터본 파일을 업로드하거나 가져가서 완성도 있는 결과물을 공유합니다.' }
+  ]
 };
 
 export const INITIAL_INQUIRIES: Inquiry[] = [
