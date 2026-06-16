@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Outfit:wght@300;400;500;600;700;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Noto Sans KR', 'Outfit', system-ui, sans-serif;
+  --font-display: 'Outfit', 'Noto Sans KR', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --color-accent-var: var(--theme-accent, #ffc92e);
+  --color-bg-var: var(--theme-bg, #000000);
+  --color-text-var: var(--theme-text, #ffffff);
+  --color-card-bg-var: var(--theme-card-bg, #121212);
+}
+
+/* Custom Selection Highlight Style */
+::selection {
+  background-color: #ffc92e;
+  color: #000000;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--theme-bg, #000000);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-accent, #ffc92e);
+}
+
+/* Base custom classes to match modern motion studio styles */
+.text-stroke {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+  color: transparent;
+}
+
+.text-stroke-active {
+  -webkit-text-stroke: 1px var(--theme-accent, #ffc92e);
+  color: transparent;
+}
+
+/* Custom background animation for grid */
+.grid-mesh {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* High contrast glass card */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glow-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glow-hover:hover {
+  box-shadow: 0 0 20px rgba(var(--theme-accent-rgb, 255, 201, 46), 0.3);
+}
+
+@layer utilities {
+  .clip-diagonal {
+    clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+  }
+}
+
+/* Elegant repeating 45deg black and semi-transparent white stripes for hero hover */
+.hero-stripe-hover-bg {
+  background-image: repeating-linear-gradient(
+    45deg,
+    #000000,
+    #000000 18px,
+    rgba(255, 255, 255, 0.35) 18px,
+    rgba(255, 255, 255, 0.35) 36px
+  );
+}
+
+/* Beautiful diagonal high-contrast black and white stripes for top hero cover background */
+.hero-stripe-cover {
+  background-image: repeating-linear-gradient(
+    45deg,
+    #ffffff,
+    #ffffff 18px,
+    #000000 18px,
+    #000000 36px
+  );
+}
+
